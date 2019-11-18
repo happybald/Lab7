@@ -5,9 +5,8 @@
 #include <fstream>
 #include <chrono>
 #include <conio.h>
+#include <vector>
 #include <ctime>
-#include <list>
-#include <iterator>
 #include <windows.h>
 #include <string>
 using namespace std;
@@ -21,6 +20,13 @@ using namespace std;
 
 typedef chrono::system_clock Clock;
 
+
+void ClearScreen()
+{
+	int n;
+	for (n = 0; n < 10; n++)
+		printf("\n\n\n\n\n\n\n\n\n\n");
+}
 
 double fRand(double fMin, double fMax)
 {
@@ -299,11 +305,28 @@ public:
 		cout << this->name1 << endl;
 	}*/
 
+	friend bool operator< (const FlatPay &First, const FlatPay &Second);
 	friend ostream& operator<< (ostream& out, FlatPay& point);
 };
-bool CompareFlatPay (const FlatPay &o1, const FlatPay &o2)
+
+
+bool CompareFlatPayCh(char *o1, char *o2)
 {
-	return o1.TotalPrice > o2.TotalPrice;
+	if (strcmp(o1, o2) < 0) {
+		return true;
+	}
+	if (strcmp(o1, o2) > 0) {
+		return false;
+	}
+}
+bool CompareFlatPayV(double v1, double v2)
+{
+	return v1 > v2;
+}
+
+bool operator< (const FlatPay &First, const FlatPay &Second)
+{
+	return First.TotalPrice < Second.TotalPrice;
 }
 
 
@@ -428,42 +451,97 @@ public:
 	}
 };
 
-void showlist(list <FlatPay> g)
-{
-	list <FlatPay> ::iterator it;
-	for (it = g.begin(); it != g.end(); ++it)
-		cout << '\t' << *it;
-	cout << '\n';
+void SortBubbleChar(vector<char*> &g) {
+	char temp[50];
+	for (int i = 0; i < g.size() - 1; i++) {
+		for (int j = 0; j < g.size() - i - 1; j++) {
+			if (strcmp(g[j], g[j + 1]) > 0) {
+				strcpy(temp, g[j]);
+				strcpy(g[j], g[j + 1]);
+				strcpy(g[j + 1], temp);
+			}
+		}
+	}
 }
+void SortBubbleDouble(vector<double> &v) {
+	double temp;
+	for (int i = 0; i < v.size() - 1; i++) {
+		for (int j = 0; j < v.size() - i - 1; j++) {
+			if (v[j] < v[j + 1]) {
+				temp = v[j];
+				v[j] = v[j + 1];
+				v[j + 1] = temp;
+			}
+		}
+	}
+}
+
 
 int main() {
 	srand(time(NULL));
 	int ind;
-	MainCost Main(10);
+	MainCost Main(100);
+	ClearScreen();
 	do {
 		cout << "1. Show all FlatPays;" << endl;
+		cout << "2. STL Sorts;" << endl;
+		cout << "3. Bubble Sorts;" << endl;
 		cin >> ind;
 		switch (ind)
 		{
 		case 1: {
-			system("cls");
-			for (int i = 0; i < Main.getSize(); i++) {
-				Main[i].Show();
+			ClearScreen();
+			for (int i = 0; i < 10; i++) {
+				Main[i].ShowName();
 			}
-			//double total = Main.AvgGarmonichne((double)Main.getSize(), Main.getFlatPayList());
-			//cout << total << endl;
 			break;
 		}
 		case 2: {
-			list<FlatPay> List1;
+			ClearScreen();
+			vector<double> V1(Main.getSize());
+			vector<char*> V2(Main.getSize());
 			for (int i = 0; i < Main.getSize(); i++) {
-				List1.push_back(Main[i]);
+				V1[i] = Main[i].TotalPrice;
+				V2[i] = new char[strlen(Main[i].name) + 1];
+				strcpy(V2[i], Main[i].name);
 			}
 			unsigned int start_time = clock();
-			List1.sort(CompareFlatPay);
+			sort(V2.begin(), V2.end(), CompareFlatPayCh);
 			unsigned int end_time = clock();
 			unsigned int search_time = end_time - start_time;
-			cout << "Default STL Sort time : " << search_time << endl;
+			cout << "STL Sort char time : " << search_time << endl;
+			start_time = clock();
+			sort(V1.begin(), V1.end(), CompareFlatPayV);
+			end_time = clock();
+			search_time = end_time - start_time;
+			cout << "STL Sort double time : " << search_time << endl;
+			for (int i = 0; i < 10; i++) {
+				cout << V1[i] << "\t" << V2[i] << endl;
+			}
+			break;
+		}
+		case 3: {
+			ClearScreen();
+			vector<double> V3(Main.getSize());
+			vector<char*> V4(Main.getSize());
+			for (int i = 0; i < Main.getSize(); i++) {
+				V3[i] = Main[i].TotalPrice;
+				V4[i] = new char[strlen(Main[i].name) + 1];
+				strcpy(V4[i], Main[i].name);
+			}
+			unsigned int start_time = clock();
+			SortBubbleChar(V4);
+			unsigned int end_time = clock();
+			unsigned int search_time = end_time - start_time;
+			cout << "Bubble Sort char time : " << search_time << endl;
+			start_time = clock();
+			SortBubbleDouble(V3);
+			end_time = clock();
+			search_time = end_time - start_time;
+			cout << "Bubble Sort double time : " << search_time << endl;
+			for (int i = 0; i < 10; i++) {
+				cout << V3[i] << "\t" << V4[i] << endl;
+			}
 			break;
 		}
 		default:
