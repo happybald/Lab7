@@ -6,6 +6,8 @@
 #include <chrono>
 #include <conio.h>
 #include <ctime>
+#include <list>
+#include <iterator>
 #include <windows.h>
 #include <string>
 using namespace std;
@@ -296,7 +298,14 @@ public:
 	/*void ShowName1() {
 		cout << this->name1 << endl;
 	}*/
+
+	friend ostream& operator<< (ostream& out, FlatPay& point);
 };
+bool CompareFlatPay (const FlatPay &o1, const FlatPay &o2)
+{
+	return o1.TotalPrice > o2.TotalPrice;
+}
+
 
 class MainCost {
 private:
@@ -388,6 +397,24 @@ ostream& operator<< (ostream& out, MainCost& point) {
 	out << "Total Price : " << point.GetTotalCost() << endl;
 	return out;
 }
+ostream& operator<< (ostream& out, FlatPay& point) {
+	out << fixed << setprecision(2) << setw(10) << "Name" << setw(15) << "Surname" << setw(15) << "Birthday" << setw(15) << "Pos Date" << endl;
+	out << setw(10) << point.name << setw(15) << point.surname << setw(10) << point.Human::birhtday.day << "." << point.Human::birhtday.month << "." << point.Human::birhtday.year << setw(8) << point.FlatPay::Habitant::pos.day << "." << point.FlatPay::Habitant::pos.month << "." << point.FlatPay::Habitant::pos.year << endl;
+	out << setw(15) << point.street << setw(5) << point.build << setw(5) << "  flat: " << point.flat << endl;
+	out << endl;
+	out << setw(2) << "Receipt From : " << setw(9) << point.FlatPay::Termin::Tmonth << "." << point.FlatPay::Termin::Tyear << endl;
+	out << setw(2) << "Cold Water : " << setw(15) << point.HolVodValue << " Mul " << point.HolVod << " = " << point.HolVod * point.HolVodValue << endl;
+	out << setw(2) << "Hot Water : " << setw(16) << point.GarVodValue << " Mul " << point.GarVod << " = " << point.GarVod * point.GarVodValue << endl;
+	out << setw(2) << "Electro : " << setw(18) << point.ElPostValue << " Mul " << point.ElPost << " = " << point.ElPost * point.ElPostValue << endl;
+	out << setw(2) << "ComPosl : " << setw(19) << point.ComPosl << endl;
+	out << setw(2) << "In Total : " << setw(19) << point.TotalPrice << endl;
+	out << setw(2) << "Today date : " << setw(14) << point.FlatPay::date.day << "." << point.FlatPay::date.month << "." << point.FlatPay::date.year << endl;
+	for (int i = 0; i <= 60; i++) {
+		out << "-";
+	}
+	out << endl << endl;
+	return out;
+}
 
 template<typename TT>
 class TEMP {
@@ -401,12 +428,18 @@ public:
 	}
 };
 
+void showlist(list <FlatPay> g)
+{
+	list <FlatPay> ::iterator it;
+	for (it = g.begin(); it != g.end(); ++it)
+		cout << '\t' << *it;
+	cout << '\n';
+}
+
 int main() {
 	srand(time(NULL));
 	int ind;
-	Human* pointer = new Human();
-	MainCost* ptr = new MainCost();
-	MainCost Main(2);
+	MainCost Main(10);
 	do {
 		cout << "1. Show all FlatPays;" << endl;
 		cin >> ind;
@@ -422,27 +455,15 @@ int main() {
 			break;
 		}
 		case 2: {
+			list<FlatPay> List1;
+			for (int i = 0; i < Main.getSize(); i++) {
+				List1.push_back(Main[i]);
+			}
 			unsigned int start_time = clock();
-			Main.Sortchar();
+			List1.sort(CompareFlatPay);
 			unsigned int end_time = clock();
 			unsigned int search_time = end_time - start_time;
-			cout << "Char time : " << search_time << endl;
-			break;
-		}
-		case 3: {
-			TEMP<MainCost>* tempclass = new TEMP<MainCost>(Main);
-			*ptr = tempclass->getTemp();
-			delete tempclass;
-			for (int i = 0; i < ptr->getSize(); i++) {
-				ptr->list[i].Show();
-			}
-			break;
-		}
-		case 4: {
-			TEMP<Human>* tmpcl = new TEMP<Human>(*Main.list[0].getHuman());
-			*pointer = tmpcl->getTemp();
-			delete tmpcl;
-			pointer->Show();
+			cout << "Default STL Sort time : " << search_time << endl;
 			break;
 		}
 		default:
